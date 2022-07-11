@@ -79,7 +79,15 @@ app.get('/api/users', async(req, res, next)=> {
     next(ex);
   }
 });
-
+app.put('/api/users/:id', async(req,res,next)=>{
+  try {
+    const user = await User.findByPk(req.params.id);
+    const updatedUser = await user.update(req.body);
+    res.status(201).send(updatedUser)
+  } catch(ex) {
+    next(ex);
+  }
+})
 app.use((err, req, res, next)=> {
   console.log(err);
   res.status(500).send(err);

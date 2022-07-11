@@ -11,7 +11,6 @@ const Things = ({ things, users, deleteThing, increment, updateThing })=> {
         {
           things.map( thing => {
             const user = users.find(user => user.id === thing.userId) || {};
-
             return (
               <li key={ thing.id }>
                 { thing.name } ({ thing.ranking })

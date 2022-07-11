@@ -1,9 +1,9 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import axios from 'axios';
+import { createUser, deleteUser, removeThingFromUser, updateUser } from "./store";
 
-
-const Users = ({ users, createUser, deleteUser, things, removeThingFromUser })=> {
+const Users = ({ users, createUser, deleteUser, things, removeThingFromUser, increment })=> {
   return (
     <div>
       <h1>Users</h1>
@@ -13,8 +13,10 @@ const Users = ({ users, createUser, deleteUser, things, removeThingFromUser })=>
           users.map( user => {
             return (
               <li key={ user.id }>
-                { user.name }
+                { user.name } ({ user.ranking })
                 <button onClick={ ()=> deleteUser(user)}>x</button>
+                <button onClick={ ()=> increment(user,1)}>+</button>
+                <button onClick={ ()=> increment(user,-1)}>-</button>
                 <ul>
                 {
                   things.filter( thing => thing.userId === user.id)
@@ -44,24 +46,47 @@ const mapStateToProps = (state)=> {
     things: state.things
   };
 }
-
-const mapDispatch = (dispatch)=> {
+///////////////////////////////////////
+// Without Thunk
+///////////////////////////////////////
+// const mapDispatch = (dispatch)=> {
+//   return {
+//     createUser: async()=> {
+//       const user = (await axios.post('/api/users', {name: Math.random()})).data;
+//       dispatch({ type: 'CREATE_USER', user});
+//       //hint
+//       //dispatch(createUser({name: Math.random()}));
+//     },
+//     removeThingFromUser: async(thing)=> {
+//       thing = {...thing, userId: null}
+//       const updatedThing = (await axios.put(`/api/things/${thing.id}`, thing)).data
+//       dispatch({ type: 'UPDATE_THING', thing: updatedThing});
+//     },
+//     deleteUser: async(user)=> {
+//       await axios.delete(`/api/users/${user.id}`);
+//       dispatch({ type: 'DELETE_USER', user});
+//     },
+//   };
+// }
+///////////////////////////////////////
+// With Thunk
+///////////////////////////////////////
+const mapDispatchToProps = (dispatch) => {
   return {
-    createUser: async()=> {
-      const user = (await axios.post('/api/users', {name: Math.random()})).data;
-      dispatch({ type: 'CREATE_USER', user});
-      //hint
-      //dispatch(createUser({name: Math.random()}));
+    createUser: ()=>{
+        dispatch(createUser({name: Math.random()}))
     },
-    removeThingFromUser: async(thing)=> {
-      thing = {...thing, userId: null}
-      const updatedThing = (await axios.put(`/api/things/${thing.id}`, thing)).data
-      dispatch({ type: 'UPDATE_THING', thing: updatedThing});
+    deleteUser: (user)=>{
+        dispatch(deleteUser(user))
     },
-    deleteUser: async(user)=> {
-      await axios.delete(`/api/users/${user.id}`);
-      dispatch({ type: 'DELETE_USER', user});
+    removeThingFromUser: (thing) => {
+        thing = {...thing, userId:null}
+        dispatch(removeThingFromUser(thing))
     },
-  };
-}
-export default connect(mapStateToProps, mapDispatch)(Users);
+    increment: (user, dir) => {
+        const updatedUser = {...user, ranking: user.ranking+dir}
+        dispatch(updateUser(updatedUser))
+    }
+  }
+};
+export default connect(mapStateToProps, mapDispatchToProps)(Users);

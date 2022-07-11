@@ -1,11 +1,15 @@
 const Sequelize = require('sequelize');
-const conn = new Sequelize(process.env.DATABASE_URL || 'postgres://localhost/the_acme_item_tracker_db');
+const conn = new Sequelize(process.env.DATABASE_URL || 'postgres://postgres:12345@localhost:5432/the_acme_item_tracker_db');
 
 const { STRING, INTEGER } = Sequelize;
 
 const User = conn.define('user', {
   name: {
     type: STRING 
+  },
+  ranking: {
+    type: INTEGER,
+    defaultValue: 5
   }
 });
 
@@ -15,7 +19,7 @@ const Thing = conn.define('thing', {
   },
   ranking: {
     type: INTEGER,
-    defaultValue: 1
+    defaultValue: 1,
   }
 });
 
@@ -25,6 +29,7 @@ Thing.addHook('beforeValidate', (thing) => {
     thing.userId = null;
   }
 });
+
 
 module.exports = {
   conn,
